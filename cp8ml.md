@@ -361,7 +361,7 @@ cfm_lda$overall
 ##   0.000000e+00   2.835910e-53
 ```
 
-Random Forest has the best accuracy.  Sample Error of 0.0036.  
+Random Forest has the best accuracy.  The Sample Error is the lowest, 0.0036.  
 - Overall Accuracy for rf : 0.9944  
 - Overall Accuracy for gbm: 0.9635  
 - Overall Accuracy for lda: 0.7133  
