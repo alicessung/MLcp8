@@ -230,7 +230,11 @@ model_rf$finalModel</code></pre>
 </div>
 <div id="validation" class="section level2">
 <h2>Validation</h2>
+<<<<<<< HEAD
 <p>Applying validation by using the 3 models to predict respectively, and compute the confusion matrix to check the accuracy.</p>
+=======
+<p>Applying validation by using the 3 models to predict respectively, and compute the confusion matrix to check the accuracy. </p>
+>>>>>>> master
 <pre class="r"><code>pre_rf &lt;- predict(model_rf,testing)
 pre_gbm &lt;- predict(model_gbm,testing)
 pre_lda &lt;- predict(model_lda,testing)
@@ -349,7 +353,11 @@ cfm_rf &lt;- confusionMatrix(testing$classe,pre_rf); cfm_rf</code></pre>
 ##   7.133390e-01   6.368052e-01   7.015969e-01   7.248692e-01   3.031436e-01 
 ## AccuracyPValue  McnemarPValue 
 ##   0.000000e+00   2.835910e-53</code></pre>
+<<<<<<< HEAD
 <p>Random Forest has the best accuracy.<br />
+=======
+<p>Random Forest has the best accuracy. By the cross-validation, sample error would be round 0.0036, which is the best out of all 3 models.<br />
+>>>>>>> master
 - Overall Accuracy for rf : 0.9944<br />
 - Overall Accuracy for gbm: 0.9635<br />
 - Overall Accuracy for lda: 0.7133</p>
