@@ -1,0 +1,132 @@
+---
+title: "Assignment: Prediction Assignment Writeup"
+author: "Alice Sung"
+date: "May 17, 2016"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+
+This is the course project of Coursera Procaticl Machine Learning of Data Science. 
+The goal is to predict the manner in which people did the exersise using data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. 
+
+# Background
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here:   http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).  
+
+# Data Processing
+
+## Data Download  
+Download the data, read csv and handle the NA strings.  
+
+```{r,results='hide',cache=T, eval=FALSE}
+setwd("~/Documents/GitHub/CP8ML")
+urltr <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+urlts <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+download.file(urltr, destfile="./training.csv", method="curl")
+download.file(urlts, destfile="./testing.csv", method="curl")
+```
+
+Meaningless values were presented as "NA", "", or "#DIV/0!" in the file. Replace all of them by on single value "NA" so that they can be faster filtered-out later.  
+
+```{r}
+tr <- read.csv("training.csv",na.strings = c("NA", "", "#DIV/0!")) 
+ts <- read.csv("testing.csv",na.strings = c("NA", "", "#DIV/0!"))
+```
+
+
+## Data Cleansing  
+
+Observe the data. (results hided.)
+```{r,results="hide",cache=T}
+str(tr)
+summary(tr)
+names(tr)
+
+# Here I choose not to print out the results, so that there's not too many lines taking all the space of this report.
+```
+
+Clear unuseful columns, such as name and timestamp. Get rid of NAs, for they contributes little to the prediction model model.   
+```{r}
+# clear unusful data, such as names, time...
+tr <- tr[,8:160]
+ts <- ts[,8:160]
+# get rid of columns which have no values
+feature <- colSums(is.na(tr))==0
+tr <- tr[,which(feature)]
+ts <- ts[,which(feature)]
+```
+
+
+# Modeling  
+
+Here I choose 3 kinds of machine learning methods to apply to the data: Random Forest, Gradient Boosting Machine, Linear Discriminant Analysis.   
+
+## Data Partitioning  
+Split the data into training set and testing set by 70% and 30%. Training set is used to train the model and the other is used validate the models' accuracy.
+
+```{r,cache=T,results='hide'}
+library(caret)
+library(gbm)
+library(randomForest)
+set.seed(0514)
+inTraining <- createDataPartition(tr$classe,p=0.7,list=F)
+training <- tr[inTraining,]
+testing <- tr[-inTraining,]
+```
+
+## Model 1: Random Forest (RF)  
+Use Random Forest to predict "classe" by all other 52 variables.  
+```{r,cache=T}
+model_rf <- train(classe~.,data=training, method="rf")
+model_rf$finalModel
+```
+
+## Model 2: Gradient Boosting Machine (GBM)  
+Use Gradient Boosting Machine to predict "classe" by all other 52 variables.   
+```{r,cache=T,results='hide'}
+model_gbm <- train(classe~.,data=training, method="gbm")
+```
+```{r,cache=TRUE}
+model_gbm$finalModel
+```
+
+## Model 3: Linear Discriminant Analysis (LDA)   
+Use Linear Discriminant Analysis to predict "classe" by all other 52 variables.  
+```{r,cache=T,results='hide'}
+model_lda <- train(classe~.,data=training, method="lda")
+```
+
+## Validation
+Applying validation by using the 3 models to predict respectively, and compute the confusion matrix to check the accuracy.  
+```{r,cache=T}
+pre_rf <- predict(model_rf,testing)
+pre_gbm <- predict(model_gbm,testing)
+pre_lda <- predict(model_lda,testing)
+cfm_rf <- confusionMatrix(testing$classe,pre_rf); cfm_rf
+cfm_gbm <- confusionMatrix(testing$classe,pre_gbm); cfm_gbm
+cfm_lda <- confusionMatrix(testing$classe,pre_lda); cfm_lda
+```
+
+
+## Model Selection
+Compare the model accuracy.
+```{r}
+cfm_rf$overall
+cfm_gbm$overall
+cfm_lda$overall
+```
+
+Random Forest has the best accuracy.  
+- Overall Accuracy for rf : 0.9944  
+- Overall Accuracy for gbm: 0.9635  
+- Overall Accuracy for lda: 0.7133  
+
+# Conclusion  
+Since Random Forest has the best accuracy (99.44%), hence apply this model to predict the test set downloaded. By submitting the answers to week 4 quiz, they were all correct!!
+```{r,cache=T}
+pre20 <- predict(model_rf,ts); pre20
+```
+
+
+
